@@ -1,0 +1,14 @@
+# Dependencies and build output
+node_modules/
+dist/
+
+# Test / tooling artifacts
+test-results/
+playwright-report/
+*.log
+
+# OS / editor clutter
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
