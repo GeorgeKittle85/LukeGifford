@@ -1,0 +1,105 @@
+/* Design tokens + base element styles. Kittle Skies is dark-only: it's an
+   airline operations center at night. */
+
+:root {
+  color-scheme: dark;
+  --bg: #0b1020;
+  --surface: #121a2b;
+  --surface-2: #182239;
+  --surface-3: #1f2b47;
+  --border: #26324d;
+  --border-strong: #34446a;
+  --text: #e7ebf3;
+  --text-2: #b8c2d6;
+  --muted: #8a97b2;
+  --accent: #f5c542;
+  --accent-strong: #ffd666;
+  --accent-ink: #1b1505;
+  --pos: #5fd08f;
+  --neg: #ff8080;
+  --warn: #fab219;
+  --danger: #d03b3b;
+  --good: #0ca30c;
+  --focus: #7fb2ff;
+  --radius: 10px;
+  --radius-sm: 6px;
+  --shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --panel-width: 440px;
+  --gutter: 16px;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 14px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+}
+
+body { overflow: hidden; }
+
+h1, h2, h3 { margin: 0 0 8px; line-height: 1.25; }
+h2 { font-size: 17px; }
+h3 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-2); margin-top: 18px; }
+p { margin: 0 0 10px; }
+a { color: var(--accent); }
+code { font-family: var(--mono); background: var(--surface-3); padding: 1px 5px; border-radius: 4px; }
+
+button, input, select, textarea { font: inherit; color: inherit; }
+
+input[type="text"], input[type="date"], select {
+  background: var(--surface-2);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  padding: 6px 8px;
+  min-height: 34px;
+  max-width: 100%;
+}
+
+input[type="range"] { width: 100%; accent-color: var(--accent); }
+input[type="checkbox"] { accent-color: var(--accent); width: 16px; height: 16px; vertical-align: -3px; }
+
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+.muted { color: var(--muted); }
+.small { font-size: 12px; }
+.pos { color: var(--pos); }
+.neg { color: var(--neg); }
+.warn { color: var(--warn); }
+.lead { font-size: 15px; color: var(--text); }
+.grow { flex: 1 1 auto; min-width: 0; }
+
+[hidden] { display: none !important; }
+
+.splash {
+  display: grid;
+  place-items: center;
+  height: 100vh;
+  color: var(--muted);
+  font-size: 16px;
+}
+
+.boot-error {
+  position: fixed;
+  inset: 20px;
+  max-width: 640px;
+  height: fit-content;
+  margin: auto;
+  padding: 24px;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  z-index: 9999;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+}
