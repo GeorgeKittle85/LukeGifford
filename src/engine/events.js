@@ -1,6 +1,6 @@
 // Random events: weekly deck draws, daily weather, and player decisions.
 
-import { AIRPORTS, AIRPORT_BY_CODE, WEATHER_INTENSITY, WEATHER_LABELS } from '../data/airports.js';
+import { AIRPORTS, WEATHER_INTENSITY, WEATHER_LABELS } from '../data/airports.js';
 import { AIRCRAFT } from '../data/aircraft.js';
 import { DECISION_TYPES, EVENT_TYPES } from '../data/eventCatalog.js';
 import { DIFFICULTIES } from '../data/rivals.js';
@@ -291,8 +291,4 @@ export function expireDecisions(state, out) {
   for (const d of [...state.decisions]) {
     if (state.now >= d.expiresT) resolveDecision(state, d, d.options[0].id, out);
   }
-}
-
-export function airportName(code) {
-  return AIRPORT_BY_CODE[code]?.city ?? code;
 }

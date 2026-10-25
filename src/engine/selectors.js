@@ -65,6 +65,16 @@ export function pairInfo(state, a, b, airlineId = state.humanAirlineId) {
   };
 }
 
+// E[min(cap, X)] for X uniform on mean +/- spread (a simple stand-in for the
+// scheduler's booking noise).
+function expectedCapped(mean, cap, spread) {
+  const lo = mean * (1 - spread);
+  const hi = mean * (1 + spread);
+  if (cap >= hi) return mean;
+  if (cap <= lo) return cap;
+  return ((cap * cap - lo * lo) / 2 + cap * (hi - cap)) / (hi - lo);
+}
+
 // Weekly estimate for flying a pair at `fare` with the given aircraft types.
 export function estimateRoute(state, airlineId, a, b, fare, planeTypes) {
   const airline = state.airlines[airlineId];
@@ -81,10 +91,13 @@ export function estimateRoute(state, airlineId, a, b, fare, planeTypes) {
     const count = planeTypes.filter((t) => t === type).length;
     const typeCap = routeCapacity(state, { a, b }, [type]);
     const legs = typeCap.legs * count;
+    const seats = AIRCRAFT[type].seats;
     const bookedPerLeg = offer.legs ? offer.booked / offer.legs : 0;
-    const shows = bookedPerLeg * (1 - noShow);
-    const flown = Math.min(shows, AIRCRAFT[type].seats);
-    const legRevenue = flown * fare + bookedPerLeg * noShow * fare * NO_SHOW_REVENUE_SHARE;
+    // Day-to-day demand swings +/-12%, and a full plane can't absorb the good
+    // days, so the expected load sits a little below the average booking.
+    const booked = expectedCapped(bookedPerLeg, seats * (1 + airline.settings.overbooking), 0.12);
+    const flown = Math.min(booked * (1 - noShow), seats);
+    const legRevenue = (flown * fare + booked * noShow * fare * NO_SHOW_REVENUE_SHARE) * AIRCRAFT[type].cabinYield;
     const c = legCost(state, airline, type, a, b, flown, legRevenue);
     revenue += legRevenue * legs;
     costs += c.total * legs;
@@ -162,10 +175,6 @@ export function repTarget(state, airlineId) {
 
 export function liveEvents(state) {
   return activeEvents(state).map((e) => ({ ...e, remaining: e.endT - state.now }));
-}
-
-export function upcomingOrActiveStorms(state) {
-  return state.activeEvents.filter((e) => e.type === 'storm' && e.endT > state.now);
 }
 
 export function rivalSummaries(state) {

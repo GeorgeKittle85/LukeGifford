@@ -122,6 +122,8 @@ export function handleWeekEnd(state, item, out) {
     }
   }
 
+  // The report goes out first so the player sees it before any outcome or new decision.
+  if (humanReport) out.push({ type: 'weekReport', week, report: humanReport });
   checkWeeklyObjectives(state, out);
   runAi(state, out, week);
   walkFuel(state);
@@ -129,5 +131,4 @@ export function handleWeekEnd(state, item, out) {
   for (const id of Object.keys(state.airlines)) state.ledger[id] = emptyLedger();
   rollWeeklyEvents(state, out);
   schedule(state, item.t + MIN_PER_WEEK, 'WEEK_END');
-  if (humanReport) out.push({ type: 'weekReport', week, report: humanReport });
 }

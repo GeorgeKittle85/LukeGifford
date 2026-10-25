@@ -167,7 +167,8 @@ export function handleDepart(state, item, out) {
     const showUps = booked - noShows;
     bumped = Math.max(0, showUps - type.seats);
     pax = showUps - bumped;
-    revenue = pax * fare + noShows * fare * NO_SHOW_REVENUE_SHARE;
+    // Premium cabins on widebodies lift the average ticket above the economy fare.
+    revenue = (pax * fare + noShows * fare * NO_SHOW_REVENUE_SHARE) * type.cabinYield;
   }
 
   const flight = {

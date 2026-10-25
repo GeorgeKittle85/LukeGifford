@@ -15,7 +15,7 @@ import { schedule } from './eventQueue.js';
 import { resolveDecision } from './events.js';
 import { addLog, fmtMoney } from './log.js';
 import { marketPrices } from './market.js';
-import { PAIRS, canFly, getPair, pairKey } from './network.js';
+import { PAIRS, canFly, pairKey } from './network.js';
 import { disposePlane, kickPlane, ledgerFor } from './scheduler.js';
 import { createPlane, createRoute } from './state.js';
 import { MIN_PER_WEEK } from './time.js';
@@ -234,9 +234,4 @@ export function applyCommand(state, cmd, out = []) {
   } catch (err) {
     return fail(`Command failed: ${err.message}`);
   }
-}
-
-// Exposed for the route planner UI.
-export function routeRangeOk(typeId, a, b) {
-  return canFly(typeId, getPair(a, b).distance);
 }

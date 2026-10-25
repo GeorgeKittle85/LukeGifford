@@ -20,10 +20,6 @@ export function schedule(state, t, kind, data = {}) {
   return item;
 }
 
-export function peek(state) {
-  return state.queue[0] || null;
-}
-
 export function pop(state) {
   const heap = state.queue;
   if (heap.length === 0) return null;
