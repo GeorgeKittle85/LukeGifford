@@ -2,6 +2,7 @@
 // End-to-end smoke test in a real browser (Playwright + Chromium).
 //   npm run test:e2e              -> tests the dev build served over HTTP
 //   npm run test:e2e -- --offline-build  -> also opens dist/kittle-skies.html from disk
+//   npm run test:e2e -- --url=https://example.github.io/repo/  -> tests a deployed copy
 //
 // Plays a short session: new game, open a route, fly, weekly report, every
 // tab, save + reload + continue, phone layout, and offline reload.
@@ -26,7 +27,8 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const outDir = join(root, 'test-results');
 mkdirSync(outDir, { recursive: true });
 const PORT = 8000 + Math.floor(Math.random() * 900);
-const BASE = `http://localhost:${PORT}/`;
+const remote = process.argv.find((a) => a.startsWith('--url='))?.slice('--url='.length);
+const BASE = remote ? (remote.endsWith('/') ? remote : `${remote}/`) : `http://localhost:${PORT}/`;
 const checkOfflineBuild = process.argv.includes('--offline-build');
 
 const failures = [];
@@ -42,8 +44,9 @@ const step = async (name, fn) => {
 };
 const assert = (cond, msg) => { if (!cond) throw new Error(msg); };
 
-const server = spawn(process.execPath, [join(root, 'scripts/serve.mjs'), String(PORT)], { stdio: 'ignore' });
-await new Promise((r) => setTimeout(r, 600));
+const server = remote ? null : spawn(process.execPath, [join(root, 'scripts/serve.mjs'), String(PORT)], { stdio: 'ignore' });
+if (server) await new Promise((r) => setTimeout(r, 600));
+console.log(`Testing ${BASE}`);
 
 const browser = await chromium.launch();
 const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
@@ -179,7 +182,7 @@ try {
   });
 } finally {
   await browser.close();
-  server.kill();
+  server?.kill();
 }
 
 if (failures.length) {

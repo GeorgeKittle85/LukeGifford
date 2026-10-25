@@ -1,0 +1,56 @@
+# After each GitHub Pages deployment finishes, play the live site in Chromium
+# to confirm the deployed game actually works. Can also be run by hand from
+# the Actions tab ("Run workflow").
+name: Verify live site
+
+on:
+  workflow_run:
+    workflows: ["pages build and deployment"]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: read
+
+jobs:
+  live:
+    name: Smoke test the deployed game
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+      - name: Find the Pages URL
+        id: pages
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          url=$(gh api "repos/${{ github.repository }}/pages" --jq .html_url)
+          echo "Live site: $url"
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+      - name: Wait for the site to respond
+        run: |
+          for i in $(seq 1 30); do
+            code=$(curl -s -o /dev/null -w "%{http_code}" "${{ steps.pages.outputs.url }}")
+            [ "$code" = "200" ] && exit 0
+            echo "Got HTTP $code, retrying..."; sleep 10
+          done
+          echo "Site did not return 200"; exit 1
+      - name: Install Playwright and Chromium
+        run: |
+          npm install --no-save playwright@1.63.0
+          npx playwright install --with-deps chromium
+      - name: Play through a session on the live site
+        run: npm run test:e2e -- --url=${{ steps.pages.outputs.url }}
+      - name: Upload screenshots
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: live-site-screenshots
+          path: test-results/
+          if-no-files-found: ignore
+          retention-days: 14

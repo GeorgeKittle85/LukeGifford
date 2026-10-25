@@ -1,0 +1,67 @@
+# Runs on every push to main, every pull request, and on demand.
+#  - Engine unit tests on each supported Node version (no dependencies needed)
+#  - A short headless run of the balance simulator (catches crashes in the AI/economy)
+#  - A real-browser smoke test (Playwright + Chromium) that plays a session,
+#    checks saves, offline reload, the phone layout, and the single-file build
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  engine:
+    name: Engine tests (Node ${{ matrix.node }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [20, 22, 24]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Unit tests
+        run: npm test
+      - name: Balance simulator smoke run
+        run: node scripts/balance-sim.mjs 12 1 SFO pro
+
+  browser:
+    name: Browser smoke test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Build the single-file offline version
+        run: npm run build:offline
+      - name: Install Playwright and Chromium
+        run: |
+          npm install --no-save playwright@1.63.0
+          npx playwright install --with-deps chromium
+      - name: Play through a session in Chromium
+        run: npm run test:e2e -- --offline-build
+      - name: Upload screenshots
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: smoke-test-screenshots
+          path: test-results/
+          if-no-files-found: ignore
+          retention-days: 14
