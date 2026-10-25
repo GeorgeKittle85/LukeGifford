@@ -1,5 +1,9 @@
 # Kittle Skies ✈
 
+[![Tests](https://github.com/GeorgeKittle85/LukeGifford/actions/workflows/tests.yml/badge.svg)](https://github.com/GeorgeKittle85/LukeGifford/actions/workflows/tests.yml)
+
+**▶ Play now: <https://georgekittle85.github.io/LukeGifford/>**
+
 **A real-ish-time airline tycoon for the browser.** You start with one leased
 regional jet, one hub airport and $1,000,000. Open routes, set ticket prices,
 lease bigger jets and grow without going bankrupt. Like building a dynasty
@@ -21,8 +25,8 @@ Pick whichever is easiest:
 
 | Option | How |
 |---|---|
-| **GitHub Pages** | In the repo settings, enable Pages for this branch (root folder) and open the URL. The game caches itself, so after the first visit it works offline too. |
-| **Local web server** | `npm start` (Node 18+, no install needed) and open <http://localhost:8000>. Or use `python3 -m http.server 8000`. |
+| **Online** | <https://georgekittle85.github.io/LukeGifford/> (GitHub Pages, deployed from `main`). The game caches itself, so after the first visit it works offline too. |
+| **Local web server** | `npm start` (Node 20+, no install needed) and open <http://localhost:8000>. Or use `python3 -m http.server 8000`. |
 | **Single offline file** | `npm install && npm run build:offline`, then double-click `dist/kittle-skies.html`. It's one ~1 MB file with everything inside, which you can copy anywhere. |
 
 > Opening `index.html` straight from disk doesn't work, because browsers block
@@ -86,7 +90,12 @@ npm run balance           # headless balance simulator: scripted strategies vs. 
 npm start                 # local server on :8000
 npm run build:offline     # dist/kittle-skies.html (needs `npm install` for esbuild)
 npm run test:e2e          # browser smoke test (needs Playwright + Chromium installed)
+npm run test:e2e -- --url=https://georgekittle85.github.io/LukeGifford/   # same test against the live site
 ```
+
+**Continuous integration** (`.github/workflows/`):
+- **Tests** runs on every push to `main`, every pull request, and on demand. It runs the engine unit tests on Node 20, 22 and 24, a short balance-simulator run, and the Chromium smoke test with the offline build. If a run fails, its screenshots are attached to the run.
+- **Verify live site** runs after every GitHub Pages deployment (or on demand) and plays through the deployed game to make sure it actually works.
 
 **Project layout**
 
